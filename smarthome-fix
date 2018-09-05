@@ -1,0 +1,131 @@
+#define BLYNK_PRINT Serial        //mendefinisikan print serial default blynk
+#include <ESP8266WiFi.h>          //memasukkan library Esp8266wifi
+#include <BlynkSimpleEsp8266.h>   //memasukkan library blynk interface esp
+#include <Servo.h>                //memasukkan library servo
+
+//deklarasi pin digital stepper
+int IN1=D5;
+int IN2=D6;
+int IN3=D7;
+int IN4=D8;
+
+
+int step = 360;     //deklarasi langkah stepper taip satu rotasi
+int delaytime=2;    //makin kecil delay, makin cepat motor berputar
+
+//deklarasi token blynk, id wifi, dan password wifi
+char auth[] = "4bc102ec2bd5464cb9e8043098f13cce";
+char ssid[] = "Tomi";
+char pass[] = "12345678";
+
+//inisialisasi servo, dan menghubungkan dengan virtual pin di blynk
+Servo servo;
+BLYNK_WRITE(V3) {
+servo.write(param.asInt());
+servo.attach(5); 
+}
+
+//inisialisasi servo, dan menghubungkan dengan virtual pin di blynk
+Servo servo1;
+BLYNK_WRITE(V4) {
+servo1.write(param.asInt());
+servo1.attach(4); 
+}
+
+void setup(){
+Serial.begin(9600);
+Blynk.begin(auth, ssid, pass);  //memulai akses nodemcu ke blynk
+
+pinMode(IN1,OUTPUT);            //mode pin IN1 sebagai output
+pinMode(IN2,OUTPUT);            //mode pin IN2 sebagai output
+pinMode(IN3,OUTPUT);            //mode pin IN3 sebagai output
+pinMode(IN4,OUTPUT);            //mode pin IN4 sebagai output
+}
+
+//inisialisasi stepper dengan virtual pin di blynk (Maju)
+BLYNK_WRITE(V1){
+  for (int i=0; i<360; i++){
+  maju();}
+}
+
+//inisialisasi stepper dengan virtual pin di blynk (Mundur)
+BLYNK_WRITE(V2){
+  for (int i=0; i<360; i++){
+  mundur();}
+}
+
+//proses looping blynk
+void loop(){
+Blynk.run();      
+}
+
+
+void maju(){
+//step 4
+step1();
+delay(delaytime);
+
+//step 3
+step2();
+delay(delaytime);
+
+//step 2
+step3();
+delay(delaytime);
+
+//step 1
+step4();
+delay(delaytime);
+}
+
+
+void mundur(){
+//step 4
+step4();
+delay(delaytime);
+
+//step 3
+step3();
+delay(delaytime);
+
+//step 2
+step2();
+delay(delaytime);
+
+//step 1
+step1();
+delay(delaytime);
+}
+
+
+void step1(){
+digitalWrite(IN1,LOW);    //IN1 Mati
+digitalWrite(IN2,LOW);    //IN2 Mati
+digitalWrite(IN3,HIGH);   //IN3 Hidup
+digitalWrite(IN4,HIGH);   //IN4 Hidup
+}
+
+
+
+void step2(){
+digitalWrite(IN1,HIGH);   //IN1 Hidup
+digitalWrite(IN2,LOW);    //IN1 Mati
+digitalWrite(IN3,LOW);    //IN1 Mati
+digitalWrite(IN4,HIGH);   //IN1 Hidup
+}
+
+
+void step3(){
+digitalWrite(IN1,HIGH);   //IN1 Hidup
+digitalWrite(IN2,HIGH);   //IN1 Hidup
+digitalWrite(IN3,LOW);    //IN1 Mati
+digitalWrite(IN4,LOW);    //IN1 Mati
+}
+
+
+void step4(){
+digitalWrite(IN1,LOW);    //IN1 Mati
+digitalWrite(IN2,HIGH);   //IN1 Hidup
+digitalWrite(IN3,HIGH);   //IN1 Hidup
+digitalWrite(IN4,LOW);    //IN1 Mati
+}
